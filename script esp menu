@@ -146,9 +146,7 @@ RunService.RenderStepped:Connect(showDistanceAndBox)
 -- Add functionality to close menu with 'K' key
 UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
     if input.KeyCode == Enum.KeyCode.K and not gameProcessedEvent then
-        UI:Quit{
-            Message = "Menu fechado.",
-            Length = 1
-        }
+        UI:Toggle() -- Alterna a visibilidade do menu
+        print("Menu alternado.")
     end
 end)
