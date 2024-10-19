@@ -30,14 +30,6 @@ local ESPButton = Divider:Button{
     end
 }
 
-local HideMenuButton = Divider:Button{
-    Name = "Hide Menu",
-    Description = "Oculta o menu",
-    Callback = function()
-        UI:Toggle() -- Alterna a visibilidade do menu
-    end
-}
-
 -- Script
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
