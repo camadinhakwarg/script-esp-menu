@@ -35,7 +35,7 @@ local HideMenuButton = Divider:Button{
     Description = "Oculta o menu",
     Callback = function()
         UI:Toggle() -- Alterna a visibilidade do menu
-        menuVisible = false
+        menuVisible = not menuVisible
     end
 }
 
@@ -153,7 +153,7 @@ end
 Players.PlayerAdded:Connect(onPlayerAdded)
 RunService.RenderStepped:Connect(showDistanceAndBox)
 
--- Add functionality to close menu with 'P' key
+-- Add functionality to toggle menu with 'P' key
 UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
     if input.KeyCode == Enum.KeyCode.P and not gameProcessedEvent then
         if menuVisible then
