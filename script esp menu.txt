@@ -10,11 +10,10 @@ local Main = UI:Tab{
 }
 
 local Divider = Main:Divider{
-    Name = "Options"
+    Name = "ESP Options"
 }
 
 local scriptEnabled = false
-local noclipEnabled = false
 
 local ESPButton = Divider:Button{
     Name = "ESP",
@@ -27,15 +26,6 @@ local ESPButton = Divider:Button{
         else
             clearBillboardsAndBoxes()
         end
-    end
-}
-
-local NoclipButton = Divider:Button{
-    Name = "Noclip",
-    Description = "Ativa/Desativa o Noclip",
-    Callback = function()
-        noclipEnabled = not noclipEnabled
-        print("Noclip " .. (noclipEnabled and "ativado" or "desativado"))
     end
 }
 
@@ -152,22 +142,3 @@ end
 
 Players.PlayerAdded:Connect(onPlayerAdded)
 RunService.RenderStepped:Connect(showDistanceAndBox)
-
--- Noclip functionality
-local function onHeartbeat()
-    if noclipEnabled then
-        for _, part in pairs(LocalPlayer.Character:GetChildren()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
-        end
-    else
-        for _, part in pairs(LocalPlayer.Character:GetChildren()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = true
-            end
-        end
-    end
-end
-
-RunService.Heartbeat:Connect(onHeartbeat)
