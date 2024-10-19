@@ -1,0 +1,144 @@
+-- Menu
+local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
+local UI = Lib:Create{
+    Theme = "Dark", -- ou qualquer outro tema
+    Size = UDim2.new(0, 555, 0, 400) -- padrão
+}
+
+local Main = UI:Tab{
+    Name = "Main"
+}
+
+local Divider = Main:Divider{
+    Name = "ESP Options"
+}
+
+local scriptEnabled = false
+
+local ESPButton = Divider:Button{
+    Name = "ESP",
+    Description = "Ativa/Desativa o ESP",
+    Callback = function()
+        scriptEnabled = not scriptEnabled
+        print("Script " .. (scriptEnabled and "ativado" or "desativado"))
+        if scriptEnabled then
+            showDistanceAndBox()
+        else
+            clearBillboardsAndBoxes()
+        end
+    end
+}
+
+-- Script
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Teams = game:GetService("Teams")
+local Camera = game.Workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+
+local function createBillboard(player)
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = player.Name .. "_Billboard"
+    billboard.Adornee = player.Character:FindFirstChild("HumanoidRootPart")
+    billboard.Size = UDim2.new(6, 0, 6, 0)
+    billboard.StudsOffset = Vector3.new(0, -3, 0)
+    billboard.AlwaysOnTop = true
+
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.TextColor3 = Color3.new(1, 0, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextScaled = true
+    textLabel.Font = Enum.Font.ArialBold
+    textLabel.Parent = billboard
+
+    billboard.Parent = player.Character
+    return textLabel
+end
+
+local function createFullBodyBox(player)
+    local character = player.Character
+    if character then
+        for _, part in pairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                local box = Instance.new("BoxHandleAdornment")
+                box.Adornee = part
+                box.AlwaysOnTop = true
+                box.ZIndex = 5
+                box.Size = part.Size
+                if player.Team == LocalPlayer.Team then
+                    box.Color3 = Color3.new(0, 1, 0) -- Verde para o próprio time
+                else
+                    box.Color3 = Color3.new(1, 0, 0) -- Vermelho para o outro time
+                end
+                box.Transparency = 0.5
+                box.Name = "SelectionBox"
+                box.Parent = part
+            end
+        end
+    end
+end
+
+local function clearBillboardsAndBoxes()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Character then
+            local billboard = player.Character:FindFirstChild(player.Name .. "_Billboard")
+            if billboard then
+                billboard:Destroy()
+            end
+            for _, part in pairs(player.Character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    local box = part:FindFirstChild("SelectionBox")
+                    if box then
+                        box:Destroy()
+                    end
+                end
+            end
+        end
+    end
+end
+
+function showDistanceAndBox()
+    if not scriptEnabled then
+        clearBillboardsAndBoxes()
+        return
+    end
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local character = player.Character
+            if character then
+                local humanoid = character:FindFirstChild("Humanoid")
+                if humanoid and humanoid.Health > 0 then
+                    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                    if humanoidRootPart then
+                        local footPosition = humanoidRootPart.Position - Vector3.new(0, humanoidRootPart.Size.Y / 2, 0)
+                        local distance = (footPosition - Camera.CFrame.Position).Magnitude
+
+                        local textLabel = character:FindFirstChild(player.Name .. "_Billboard") and character[player.Name .. "_Billboard"].TextLabel or createBillboard(player)
+                        textLabel.Text = player.Name .. "\nDistância: " .. math.floor(distance) .. " studs"
+
+                        createFullBodyBox(player)
+                    end
+                else
+                    clearBillboardsAndBoxes()
+                end
+            end
+        end
+    end
+end
+
+local function onPlayerAdded(player)
+    player.CharacterAdded:Connect(function(character)
+        if scriptEnabled then
+            character:WaitForChild("Humanoid").Died:Connect(function()
+                clearBillboardsAndBoxes()
+            end)
+            showDistanceAndBox()
+        end
+    end)
+end
+
+Players.PlayerAdded:Connect(onPlayerAdded)
+RunService.RenderStepped:Connect(showDistanceAndBox)
