@@ -1,0 +1,246 @@
+local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
+local UI = Lib:Create{
+    Theme = "Dark",
+    Size = UDim2.new(0, 555, 0, 400)
+}
+local Main = UI:Tab{
+    Name = "Main"
+}
+local Divider = Main:Divider{
+    Name = "Options"
+}
+
+local scriptEnabled = false
+local noclipEnabled = false
+local aiming = false
+local fovCircle = nil
+local currentTarget = nil
+local fovRadius = 200
+local maxDistance = 300
+
+local ESPButton = Divider:Button{
+    Name = "ESP",
+    Description = "Ativa/Desativa o ESP",
+    Callback = function()
+        scriptEnabled = not scriptEnabled
+        print("ESP " .. (scriptEnabled and "ativado" ou "desativado"))
+        if scriptEnabled then
+            showDistanceAndBox()
+        else
+            clearBillboardsAndBoxes()
+        end
+    end
+}
+
+local NoclipButton = Divider:Button{
+    Name = "Noclip",
+    Description = "Ativa/Desativa o Noclip",
+    Callback = function()
+        noclipEnabled = not noclipEnabled
+        print("Noclip " .. (noclipEnabled and "ativado" ou "desativado"))
+    end
+}
+
+local AimLockEnabled = false -- Controle do Aim Lock
+local AimLockButton = Divider:Button{
+    Name = "Aim Lock",
+    Description = "Ativa/Desativa o Aim Lock",
+    Callback = function()
+        AimLockEnabled = not AimLockEnabled
+        print("Aim Lock " .. (AimLockEnabled and "ativado" ou "desativado"))
+        if not AimLockEnabled e fovCircle então
+            fovCircle:Destroy()
+            fovCircle = nil
+            currentTarget = nil
+        end
+    end
+}
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+
+local function createBillboard(player)
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = player.Name .. "_Billboard"
+    billboard.Adornee = player.Character:FindFirstChild("HumanoidRootPart")
+    billboard.Size = UDim2.new(6, 0, 6, 0)
+    billboard.StudsOffset = Vector3.new(0, -3, 0)
+    billboard.AlwaysOnTop = true
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.TextColor3 = Color3.new(1, 0, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextScaled = true
+    textLabel.Font = Enum.Font.ArialBold
+    textLabel.Parent = billboard
+    billboard.Parent = player.Character
+    return textLabel
+end
+
+local function createFullBodyBox(player)
+    local character = player.Character
+    if character então
+        for _, part em pares(caracter:GetChildren()) faz
+            se part:IsA("BasePart") então
+                local box = Instance.new("BoxHandleAdornment")
+                box.Adornee = part
+                box.AlwaysOnTop = true
+                box.ZIndex = 5
+                box.Size = part.Size
+                box.Color3 = player.Team == LocalPlayer.Team e Color3.new(0, 1, 0) ou Color3.new(1, 0, 0)
+                box.Transparency = 0.5
+                box.Name = "SelectionBox"
+                box.Parent = part
+            end
+        end
+    end
+end
+
+local function clearBillboardsAndBoxes()
+    for _, player em pares(Players:GetPlayers()) faz
+        se player.Character então
+            local billboard = player.Character:FindFirstChild(player.Name .. "_Billboard")
+            se billboard então
+                billboard:Destroy()
+            end
+            for _, part em pares(player.Character:GetChildren()) faz
+                se part:IsA("BasePart") então
+                    local box = part:FindFirstChild("SelectionBox")
+                    se box então
+                        box:Destroy()
+                    end
+                end
+            end
+        end
+    end
+end
+
+função showDistanceAndBox()
+    se não scriptEnabled então
+        clearBillboardsAndBoxes()
+        retornar
+    end
+    para _, player em pares(Players:GetPlayers()) faça
+        se player ~= LocalPlayer então
+            local character = player.Character
+            se character então
+                local humanoid = character:FindFirstChild("Humanoid")
+                se humanoid e humanoid.Health > 0 então
+                    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                    se humanoidRootPart então
+                        local footPosition = humanoidRootPart.Position - Vector3.new(0, humanoidRootPart.Size.Y / 2, 0)
+                        local distance = (footPosition - Camera.CFrame.Position).Magnitude
+                        local textLabel = character:FindFirstChild(player.Name .. "_Billboard") e character[player.Name .. "_Billboard"].TextLabel ou createBillboard(player)
+                        textLabel.Text = player.Name .. "\nDistância: " .. math.floor(distance) .. " cavilhas"
+                        createFullBodyBox(player)
+                    end
+                senão
+                    clearBillboardsAndBoxes()
+                end
+            end
+        end
+    end
+end
+
+local function onPlayerAdded(player)
+    player.CharacterAdded:Connect(função(caracter)
+        se scriptEnabled então
+            character:WaitForChild("Humanoid").Died:Connect(função()
+                clearBillboardsAndBoxes()
+            end)
+            showDistanceAndBox()
+        end
+    end)
+end
+
+Players.PlayerAdded:Connect(onPlayerAdded)
+RunService.RenderStepped:Connect(showDistanceAndBox)
+
+-- Funcionalidade Noclip
+local function onHeartbeat()
+    se noclipEnabled então
+        para _, parte em pares(LocalPlayer.Character:GetChildren()) faça
+            se part:IsA("BasePart") então
+                part.CanCollide = falso
+            end
+        end
+    else
+        para _, parte em pares(LocalPlayer.Character:GetChildren()) faça
+            se part:IsA("BasePart") então
+                part.CanCollide = true
+            end
+        end
+    end
+end
+
+RunService.Heartbeat:Connect(onHeartbeat)
+
+-- Funcionalidade de Bloqueio de Mira
+local function createFOVCircle()
+    local screenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+    local círculo = Instance.new("Frame", screenGui)
+    circle.Size = UDim2.new(0, fovRadius * 2, 0, fovRadius * 2)
+    circle.BackgroundColor3 = Color3.new(1, 0, 0)
+    circle.BackgroundTransparency = 0.5
+    circle.AnchorPoint = Vector2.new(0.5, 0.5)
+    circle.BorderSizePixel = 0
+    circle.Position = UDim2.new(0.5, 0, 0.5, 0)
+    local uiCorner = Instance.new("UICorner")
+    uiCorner.CornerRadius = UDim.new(0.5, 0)
+    uiCorner.Parent = círculo
+    retornar screenGui
+end
+
+RunService.RenderStepped:Connect(função()
+    se AimLockEnabled e aiming então
+        local character = LocalPlayer.Character
+        local cabeça = personagem e personagem:FindFirstChild("Head")
+        se cabeça então
+            se não fovCircle então
+                fovCircle = createFOVCircle()
+            end
+            local closestTarget = nil
+            local closestDistance = fovRadius
+            para _, player em pares(Players:GetPlayers()) faça
+                se player ~= LocalPlayer e player.Character e player.Character:FindFirstChild("Head") então
+                    local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+                    se humanoid e humanoid.Health > 0 então
+                        local targetHead = player.Character.Head
+                        local distanceToTarget = (targetHead.Position - head.Position).Magnitude
+                        se distanceToTarget <= maxDistance então
+                            local screenPosition, onScreen = Camera:WorldToScreenPoint(targetHead.Position)
+                            local circlePosition = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+                            local distance = (Vector2.new(screenPosition.X, screenPosition.Y) - circlePosition).Magnitude
+                            se onScreen e distance <= fovRadius então
+                                se distância < distância mais próxima então
+                                    closestDistance = distância
+                                    closestTarget = player
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            se closestTarget então
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestTarget.Character.Head.Position)
+                currentTarget = closestTarget
+            senão
+                se fovCircle então
+                    fovCircle:Destroy()
+                    fovCircle = nil
+                    currentTarget = nil
+                end
+            end
+        end
+    end
+end)
+
+UserInputService.InputBegan:Connect(função(entrada, processado pelo jogo)
+    se input.UserInputType == Enum.UserInputType.MouseButton2 então
+        aiming = true
+        se AimLockEnabled então
+            fovCircle = createFOVCircle()
+        end
