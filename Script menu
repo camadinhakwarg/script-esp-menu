@@ -41,8 +41,8 @@ local InterfaceManager = {}
 
 function InterfaceManager:ImportSettings()
     pcall(function()
-        if not DEBUG and getfenv().isfile and getfenv().readfile and getfenv().isfile("UISettings.ttwizz") and getfenv().readfile("UISettings.ttwizz") then
-            for Key, Value in next, HttpService:JSONDecode(getfenv().readfile("UISettings.ttwizz")) do
+        if not DEBUG and getfenv().isfile and getfenv().readfile and getfenv().isfile("UISettings.camada980 e marcos") and getfenv().readfile("UISettings.camada980 e marcos") then
+            for Key, Value in next, HttpService:JSONDecode(getfenv().readfile("UISettings.camada980 e marcos")) do
                 UISettings[Key] = Value
             end
         end
@@ -52,7 +52,7 @@ end
 function InterfaceManager:ExportSettings()
     pcall(function()
         if not DEBUG and getfenv().isfile and getfenv().readfile and getfenv().writefile then
-            getfenv().writefile("UISettings.ttwizz", HttpService:JSONEncode(UISettings))
+            getfenv().writefile("UISettings.camada980 e marcos", HttpService:JSONEncode(UISettings))
         end
     end)
 end
@@ -81,8 +81,8 @@ end
 local ImportedConfiguration = {}
 
 pcall(function()
-    if not DEBUG and getfenv().isfile and getfenv().readfile and getfenv().isfile(string.format("%s.ttwizz", game.GameId)) and getfenv().readfile(string.format("%s.ttwizz", game.GameId)) and UISettings.AutoImport then
-        ImportedConfiguration = HttpService:JSONDecode(getfenv().readfile(string.format("%s.ttwizz", game.GameId)))
+    if not DEBUG and getfenv().isfile and getfenv().readfile and getfenv().isfile(string.format("UISettings.camada980 e marcos", game.GameId)) and getfenv().readfile(string.format("UISettings.camada980 e marcos", game.GameId)) and UISettings.AutoImport then
+        ImportedConfiguration = HttpService:JSONDecode(getfenv().readfile(string.format("UISettings.camada980 e marcos", game.GameId)))
         for Key, Value in next, ImportedConfiguration do
             if Key == "FoVColour" or Key == "NameESPOutlineColour" or Key == "ESPColour" then
                 ImportedConfiguration[Key] = ColorsHandler:UnpackColour(Value)
@@ -268,8 +268,8 @@ end)
 
 do
     local Window = Fluent:CreateWindow({
-        Title = "Open Aimbot",
-        SubTitle = "By @ttwiz_z",
+        Title = "MELHOR MENU KK",
+        SubTitle = "feito por camadinha, marco e flow tetudo",
         TabWidth = UISettings.TabWidth,
         Size = UDim2.fromOffset(table.unpack(UISettings.Size)),
         Theme = UISettings.Theme,
@@ -2128,7 +2128,7 @@ function ESPLibrary:Visualize()
         local TopPosition = workspace.CurrentCamera:WorldToViewportPoint(Head.Position + Vector3.new(0, 0.5, 0))
         local BottomPosition = workspace.CurrentCamera:WorldToViewportPoint(HumanoidRootPart.Position - Vector3.new(0, 3, 0))
         if IsInViewport then
-            self.ESPBox.Size = Vector2.new(2350 / HumanoidRootPartPosition.Z, TopPosition.Y - BottomPosition.Y)
+            self.ESPBox.Size = Vector2.new(4000 / HumanoidRootPartPosition.Z, TopPosition.Y - BottomPosition.Y)
             self.ESPBox.Position = Vector2.new(HumanoidRootPartPosition.X - self.ESPBox.Size.X / 2, HumanoidRootPartPosition.Y - self.ESPBox.Size.Y / 2)
             self.ESPBox.Thickness = Configuration.ESPThickness
             self.ESPBox.Transparency = Configuration.ESPOpacity
